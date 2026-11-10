@@ -1,40 +1,18 @@
 # residual-stream-tour
 
-One Python file that runs a small language model on your computer and
-narrates what happens inside it, from the text you type to the word it
-predicts.
+A notebook that runs a small language model and narrates what happens inside
+it, from the text you type to the word it predicts.
 
-```
-uv run tour.py
-```
+**[Read the tour → `tour.ipynb`](tour.ipynb)**
 
-It prints nine short parts. Each one says what you are about to see, shows
-real numbers from inside the model, then says what to notice.
+GitHub shows the notebook with all of its output and charts, so there is
+nothing to install: open it and read from top to bottom.
 
 This is a first look, not a course or a library: one prompt, one small model,
-plain PyTorch and Hugging Face `transformers`. Run it, read the output, then
-change things. For real experiments, see [Where to go next](#where-to-go-next).
+plain PyTorch and Hugging Face `transformers`. For real experiments, see
+[Where to go next](#where-to-go-next).
 
-## Run it
-
-You need [uv](https://docs.astral.sh/uv/). Clone this repo, then:
-
-```
-uv run tour.py             # all nine parts
-uv run tour.py --part 3    # just one part
-uv run tour.py --part 7 8  # a few parts
-uv run tour.py | less      # one screen at a time
-```
-
-The first run downloads the model,
-[Qwen2.5-0.5B](https://huggingface.co/Qwen/Qwen2.5-0.5B) (about 1 GB), into
-`~/.cache/huggingface`. No GPU or account is needed, and later runs take a
-few seconds.
-
-No uv? `pip install torch transformers` then `python tour.py` should work,
-but only the uv route on Python 3.13 has been tested.
-
-## The tour
+## What's in it
 
 The parts follow the path a prompt takes through the model.
 
@@ -50,55 +28,43 @@ The parts follow the path a prompt takes through the model.
 | 8 | Logit lens | Decoding every layer to watch the answer form. |
 | 9 | Prediction | Vector → probabilities → next token, then repeat to generate text. |
 
-A sample from Part 8. The prompt is `The capital of France is`, and each row
-asks "if the model stopped at this layer, how likely is `' Paris'`?":
+Each part explains what you are about to see, shows real numbers or a chart
+from inside the model, then says what to notice. The notebook ends with a
+list of things to try.
+
+## Run it yourself
+
+You need [uv](https://docs.astral.sh/uv/). Clone this repo, then:
 
 ```
-  layer  top token (A)     P(' Paris')    rank
-     15  '\';";\n'              0.0000   33348
-     16  ' ____'                0.0000    6412
-     17  ' ____'                0.0000    9761
-     18  ' ____'                0.0000    3552
-     19  '?>>'                  0.0001    1358
-     20  ' __'                  0.0002     488
-     21  ' __'                  0.0004      82
-     22  ' Paris'               0.2493       1
-     23  ' Paris'               0.3439       1
-     24  ' Paris'               0.3156       1
+uv run --with jupyter jupyter lab tour.ipynb
 ```
 
-## Things to try
+In Jupyter, choose **Run → Run All Cells**. The settings (the prompts and the
+model) are in the first code cell.
 
-The settings are constants at the top of `tour.py`. The `NOTICE` commentary
-was written for the defaults: change something and the numbers stay right,
-but the commentary may not. Spotting where it stops being true is the
-exercise. If you change `PROMPT`, change `CONTRAST` to match; the two must
-have the same number of tokens.
+The first run downloads the model,
+[Qwen2.5-0.5B](https://huggingface.co/Qwen/Qwen2.5-0.5B) (about 1 GB), into
+`~/.cache/huggingface`. No GPU or account is needed, and the whole notebook
+runs in well under a minute.
 
-1. **Change the contrast country.** Set `CONTRAST = "The capital of Japan is"`.
-   The model's top guess is no longer a city. What is it, and what does
-   Part 8 look like now?
-2. **Get rid of the blanks.** The model gives real probability to tokens like
-   `' ____'`. Give it an example first,
-   `"The capital of Italy is Rome. The capital of France is"`, and compare
-   Part 9.
-3. **Take apart a different block.** Change `BLOCK_TO_INSPECT` to `0` or `23`
-   and compare the updates in Part 5.
-4. **Find a prompt it gets wrong.** Does the right answer still show up in
-   the middle layers of Part 8?
-5. **Harder: test a claim.** Part 6 names attention heads that look hard at
-   `' France'`. Switch one off and see whether the prediction changes.
+Other setups should work but have not been tested: the notebook only needs
+`torch`, `transformers` and `matplotlib`, so plain `pip` with any Jupyter, or
+[Google Colab](https://colab.research.google.com/github/ciminelli/residual-stream-tour/blob/main/tour.ipynb),
+are worth a try.
 
 ## Caveats
 
 - Everything here is an observation about one prompt in one small model.
-- The tables show what is in the model, not what causes its answer. Where the
-  commentary interprets rather than measures, it says so.
+- The charts and tables show what is in the model, not what causes its
+  answer. Where the commentary interprets rather than measures, it says so.
+- The commentary was written for the default prompts. Change them and the
+  numbers stay right, but the commentary may not.
 - The logit lens decodes middle layers with a readout trained only on the
   last one, so early layers decode to noise.
-- The attribute names in `tour.py` (`model.model.layers` and so on) are
-  specific to Qwen and other Llama-style models in Hugging Face. A comment in
-  the file gives GPT-2's equivalents.
+- The attribute names in the notebook (`model.model.layers` and so on) are
+  specific to Qwen and other Llama-style models in Hugging Face. The setup
+  section gives GPT-2's equivalents.
 
 ## Where to go next
 
