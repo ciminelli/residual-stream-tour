@@ -1,0 +1,14 @@
+[project]
+name = "residual-stream-tour"
+version = "0.1.0"
+description = "A narrated, single-file tour of what happens inside a small language model."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.13"
+dependencies = [
+    "torch>=2.15.0",
+    "transformers>=5.22.2",
+]
+
+[tool.uv]
+package = false
